@@ -2,6 +2,11 @@
 
 An offline-first Flutter application designed for managing and tracking customer order statuses seamlessly across online and offline states.
 
+# AUTHENTICATION CREDENTIALS
+
+LOGIN EMAIL: admin@example.com
+LOGIN PASSWORD: 12345678
+
 ---
 
 ## 📱 Features

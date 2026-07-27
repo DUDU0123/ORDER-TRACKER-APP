@@ -53,8 +53,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     ),
                   );
                 },
-                child: orderController.isUpdating ? CircularProgressIndicator(
-                  color: AppColors.kBlue,
+                child: orderController.isUpdating ? Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: CircularProgressIndicator(
+                    color: AppColors.kBlue,
+                  ),
                 ) : const Text("Update Status"),
               );
             }
