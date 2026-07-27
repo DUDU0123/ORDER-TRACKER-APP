@@ -98,6 +98,10 @@ The repository contains a unit test suite covering:
 - **`test/profile_controller_test.dart`**: Password obscure toggle and login/logout state management.
 - **`test/widget_test.dart`**: Basic app smoke test.
 
+### WHERE USED AI:
+
+For testcase creation and testing and for creating readme data I used AI tool.
+
 ### Running Tests:
 ```bash
 flutter test
