@@ -57,7 +57,7 @@ class ProfilePage extends StatelessWidget {
 
               AppConstraints.kHeight40,
 
-              GestureDetector(
+              InkWell(
                 onTap: () {
                   Get.find<ProfileController>().goToWebsite();
                 },
