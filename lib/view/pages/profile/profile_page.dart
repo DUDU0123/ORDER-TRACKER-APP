@@ -57,30 +57,35 @@ class ProfilePage extends StatelessWidget {
 
               AppConstraints.kHeight40,
 
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child:  Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.workspace_premium,
-                        size: 40.sp,
-                        color: Colors.blue,
-                      ),
-                      AppConstraints.kHeight12,
-                      Text(
-                        "Built for Digital Heroes\nTraining Task",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+              GestureDetector(
+                onTap: () {
+                  Get.find<ProfileController>().goToWebsite();
+                },
+                child: Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child:  Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.workspace_premium,
+                          size: 40.sp,
+                          color: Colors.blue,
                         ),
-                      ),
-                    ],
+                        AppConstraints.kHeight12,
+                        Text(
+                          "Built for Digital Heroes\nTraining Task",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

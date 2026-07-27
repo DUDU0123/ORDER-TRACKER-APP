@@ -4,6 +4,7 @@ import 'package:order_tracker_app/model/data/remote_data/profile_data.dart';
 import 'package:order_tracker_app/services/shared_prefs_service.dart';
 import 'package:order_tracker_app/view/pages/login/login_page.dart';
 import 'package:order_tracker_app/view/pages/orders_list/order_list_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileController extends GetxController {
   final ProfileData profileData;
@@ -56,6 +57,24 @@ class ProfileController extends GetxController {
       },), (route) => false,);
     } catch (e) {
       showSnackbar("Info", e.toString());
+    }
+  }
+
+  Future<void> goToWebsite() async {
+    try {
+      const url = 'https://digitalheroesco.com/';
+      final Uri uri = Uri.parse(url);
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        return;
+      }
+    } catch (e) {
+      return;
     }
   }
 }
