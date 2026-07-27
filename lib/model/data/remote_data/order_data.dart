@@ -5,10 +5,12 @@ import 'package:order_tracker_app/services/connection_checker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OrderData {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final SupabaseClient? _client;
   final LocalStorageService local;
 
-  OrderData({required this.local});
+  SupabaseClient get _supabase => _client ?? Supabase.instance.client;
+
+  OrderData({required this.local, SupabaseClient? client}) : _client = client;
 
   /// Fetching all orders
   Future<List<OrderModel>> getAllOrders() async {

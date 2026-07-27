@@ -1,10 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:order_tracker_app/model/order_model.dart';
 
 class LocalStorageService {
 
-  final Box orderBox = Hive.box('orders');
-  final Box profileBox = Hive.box('profile');
+  Box get orderBox => Hive.box('orders');
+  Box get profileBox => Hive.box('profile');
+  Box get updateQueueBox => Hive.box('update_queue');
 
   //---------------- Orders ----------------//
 
@@ -44,4 +46,54 @@ class LocalStorageService {
       return;
     }
   }
-}
+
+  //---------------- Update Queue ----------------//
+
+  Future<void> savePendingUpdate({
+    required String orderId,
+    required String status,
+  }) async {
+    try {
+      final updateData = {
+        'orderId': orderId,
+        'status': status,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+      await updateQueueBox.put(orderId, updateData);
+    } catch (e) {
+      debugPrint('Error saving pending update: $e');
+    }
+  }
+
+  List<Map<String, dynamic>> getPendingUpdates() {
+    try {
+      final keys = updateQueueBox.keys;
+      final List<Map<String, dynamic>> updates = [];
+      for (final key in keys) {
+        final val = updateQueueBox.get(key);
+        if (val != null) {
+          updates.add(Map<String, dynamic>.from(val as Map));
+        }
+      }
+      return updates;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<void> removePendingUpdate(String orderId) async {
+    try {
+      await updateQueueBox.delete(orderId);
+    } catch (e) {
+      debugPrint('Error removing pending update: $e');
+    }
+  }
+
+  Future<void> clearPendingUpdates() async {
+    try {
+      await updateQueueBox.clear();
+    } catch (e) {
+      debugPrint('Error clearing pending updates: $e');
+    }
+  }
+}

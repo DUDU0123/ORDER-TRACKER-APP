@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:order_tracker_app/core/colors/app_colors.dart';
 import 'package:order_tracker_app/core/utils/order_status_enum.dart';
@@ -9,15 +11,19 @@ import 'package:order_tracker_app/services/shared_prefs_service.dart';
 
 class OrderController extends GetxController {
   final OrderData orderData;
+
   /// Original list
   List<OrderModel> allOrders = <OrderModel>[].obs;
+
   /// Search list
   List<OrderModel> orders = [];
   bool isUpdating = false;
+  bool isSyncing = false;
   OrderStatusEnum orderStatus = OrderStatusEnum.processing;
-  OrderController({
-    required this.orderData,
-  });
+
+  StreamSubscription<bool>? _connectivitySubscription;
+
+  OrderController({required this.orderData});
 
   // Calling getAllOrders() in onInit to fetch orders when the controller is initialized if user is logged in. This ensures that the order list is populated as soon as the user navigates to the order list page.
   @override
@@ -25,10 +31,29 @@ class OrderController extends GetxController {
     if (SharedPrefsService.getUser() != null) {
       getAllOrders();
     }
+    _listenToConnectivity();
     super.onInit();
   }
 
-  void selectedOrderStatusUpdate({required OrderStatusEnum? selectedOrderStatus}) {
+  void _listenToConnectivity() {
+    _connectivitySubscription = ConnectionChecker().connectionStream.listen((
+      isConnected,
+    ) {
+      if (isConnected) {
+        syncPendingUpdates();
+      }
+    });
+  }
+
+  @override
+  void onClose() {
+    _connectivitySubscription?.cancel();
+    super.onClose();
+  }
+
+  void selectedOrderStatusUpdate({
+    required OrderStatusEnum? selectedOrderStatus,
+  }) {
     orderStatus = selectedOrderStatus ?? OrderStatusEnum.processing;
     update();
   }
@@ -38,22 +63,111 @@ class OrderController extends GetxController {
     update();
   }
 
+  void showSnackbar(String title, String message, {Color? colorText}) {
+    if (Get.context != null) {
+      Get.snackbar(title, message, colorText: colorText);
+    }
+  }
+
   // method for updating order status
-  void updateOrderStatusApi({required String orderId, required String newStatus}) async {
+  void updateOrderStatusApi({
+    required String orderId,
+    required String newStatus,
+  }) async {
+    updateIsUpdatingStatus(value: true);
+
+    // Optimistically update local order state
+    _optimisticallyUpdateOrder(orderId: orderId, newStatus: newStatus);
+
     final isConnected = await ConnectionChecker.checkConnectivity();
     if (!isConnected) {
-      Get.snackbar("No Internet", "Check your internet connection.", colorText: AppColors.kRed);
+      await orderData.local.savePendingUpdate(
+        orderId: orderId,
+        status: newStatus,
+      );
+      updateIsUpdatingStatus(value: false);
+      showSnackbar(
+        "Offline Mode",
+        "Status updated locally and queued for auto-sync when online.",
+        colorText: AppColors.kOrange,
+      );
       return;
     }
-    updateIsUpdatingStatus(value: true);
+
     try {
       await orderData.updateOrderStatus(orderId: orderId, status: newStatus);
-      Get.snackbar("Updated", "Status updated successfully.");
+      await orderData.local.removePendingUpdate(orderId);
+      showSnackbar("Updated", "Status updated successfully.");
       updateIsUpdatingStatus(value: false);
-      getAllOrders();
+      await getAllOrders();
     } catch (e) {
+      await orderData.local.savePendingUpdate(
+        orderId: orderId,
+        status: newStatus,
+      );
       updateIsUpdatingStatus(value: false);
-      Get.snackbar("Info", e.toString());
+      showSnackbar(
+        "Saved Offline",
+        "Network request failed. Queued for auto-sync.",
+        colorText: AppColors.kOrange,
+      );
+    }
+  }
+
+  void _optimisticallyUpdateOrder({
+    required String orderId,
+    required String newStatus,
+  }) {
+    final index = allOrders.indexWhere((o) => o.id == orderId);
+    if (index != -1) {
+      final updatedOrder = allOrders[index].copyWith(status: newStatus);
+      allOrders[index] = updatedOrder;
+
+      final searchIndex = orders.indexWhere((o) => o.id == orderId);
+      if (searchIndex != -1) {
+        orders[searchIndex] = updatedOrder;
+      }
+      orderData.local.saveOrder(updatedOrder);
+      update();
+    }
+  }
+
+  // method to sync pending updates queued offline
+  Future<void> syncPendingUpdates() async {
+    if (isSyncing) return;
+    final pendingUpdates = orderData.local.getPendingUpdates();
+    if (pendingUpdates.isEmpty) return;
+
+    final isConnected = await ConnectionChecker.checkConnectivity();
+    if (!isConnected) return;
+
+    isSyncing = true;
+    update();
+
+    int successCount = 0;
+    for (final updateItem in pendingUpdates) {
+      final orderId = updateItem['orderId'] as String?;
+      final status = updateItem['status'] as String?;
+      if (orderId != null && status != null) {
+        try {
+          await orderData.updateOrderStatus(orderId: orderId, status: status);
+          await orderData.local.removePendingUpdate(orderId);
+          successCount++;
+        } catch (e) {
+          // keep in queue if sync attempt fails
+        }
+      }
+    }
+
+    isSyncing = false;
+    update();
+
+    if (successCount > 0) {
+      showSnackbar(
+        "Sync Complete",
+        "$successCount offline update(s) synchronized with server.",
+      );
+      await getAllOrders();
     }
   }
 
@@ -65,7 +179,7 @@ class OrderController extends GetxController {
       orders = List.from(allOrders);
       update();
     } catch (e) {
-      Get.snackbar("Info", e.toString());
+      showSnackbar("Info", e.toString());
     }
   }
 
@@ -77,14 +191,11 @@ class OrderController extends GetxController {
       final search = query.toLowerCase().trim();
 
       orders = allOrders.where((order) {
-        final customerName =
-            (order.customerName).toLowerCase();
+        final customerName = (order.customerName).toLowerCase();
 
-        final status =
-            (order.status).toLowerCase();
+        final status = (order.status).toLowerCase();
 
-        final orderId =
-            (order.orderNumber).toLowerCase();
+        final orderId = (order.orderNumber).toLowerCase();
 
         return customerName.contains(search) ||
             status.contains(search) ||

@@ -22,6 +22,7 @@ Future<void> main() async {
 
   await Hive.openBox('orders');
   await Hive.openBox('profile');
+  await Hive.openBox('update_queue');
   Get.put<ProfileController>(ProfileController(profileData: ProfileData()));
   Get.put<OrderController>(OrderController(orderData: OrderData(local: LocalStorageService())));
   runApp(const RootWidgetPage());

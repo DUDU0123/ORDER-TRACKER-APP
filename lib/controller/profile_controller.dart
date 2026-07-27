@@ -17,6 +17,12 @@ class ProfileController extends GetxController {
     update();
   }
 
+  void _showSnackbar(String title, String message) {
+    if (Get.context != null) {
+      Get.snackbar(title, message);
+    }
+  }
+
   Future<void> onLoginButtonClicked({required String email, required String password}) async {
     isLoading = true;
     update();
@@ -30,7 +36,7 @@ class ProfileController extends GetxController {
           return OrderListPage();
         },), (route) => false,);
       } else {
-        Get.snackbar("Info", "Invalid email or password");
+        _showSnackbar("Info", "Invalid email or password");
         isLoading = false;
         update();
       }
@@ -38,7 +44,7 @@ class ProfileController extends GetxController {
       debugPrint('Error on login: $e');
       isLoading = false;
       update();
-      Get.snackbar("Info", "User not found");
+      _showSnackbar("Info", "User not found");
     }
   }
 
@@ -49,7 +55,7 @@ class ProfileController extends GetxController {
         return LoginPage();
       },), (route) => false,);
     } catch (e) {
-      Get.snackbar("Info", e.toString());
+      _showSnackbar("Info", e.toString());
     }
   }
 }

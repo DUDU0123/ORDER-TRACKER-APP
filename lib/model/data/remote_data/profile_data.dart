@@ -2,7 +2,11 @@ import 'package:order_tracker_app/model/profile_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileData {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final SupabaseClient? _client;
+
+  SupabaseClient get _supabase => _client ?? Supabase.instance.client;
+
+  ProfileData({SupabaseClient? client}) : _client = client;
 
   Future<ProfileModel?> login({
     required String email,
