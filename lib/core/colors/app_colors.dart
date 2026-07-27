@@ -8,6 +8,8 @@ class AppColors{
   static Color kWhite = Colors.white;
   static Color kBlack = Colors.black;
   static Color kRed = Colors.red;
+  static Color kBlue = Colors.blue;
+  static Color kOrange = Colors.orange;
   static Color kTransparent = Colors.transparent;
   static Color kGreenLight = Color(0xFF2CED3F);
   static Color kGreen = Colors.green;

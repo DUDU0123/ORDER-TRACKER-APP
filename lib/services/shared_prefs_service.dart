@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:order_tracker_app/model/profile_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +16,7 @@ class SharedPrefsService {
   static ProfileModel? getUser() {
     final data = _prefs.getString(userKey);
     if (data?.isNotEmpty == true) {
-      return ProfileModel.fromRawJson(data!);
+      return ProfileModel.fromRawJson(data ?? '{}');
     } else {
       debugPrint("No user data found.");
       return null;
@@ -23,6 +25,6 @@ class SharedPrefsService {
 
   /// SET USER DATA
   static Future<bool?> setUser(ProfileModel user) async{
-    return await _prefs.setString(userKey, user.toJson().toString());
+    return await _prefs.setString(userKey, jsonEncode(user.toJson()));
   }
 }
