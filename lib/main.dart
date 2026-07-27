@@ -16,7 +16,7 @@ Future<void> main() async {
   await SharedPrefsService.init();
   await Supabase.initialize(
     url: SupabaseDatas.supabaseDataApiUrl,
-    publishableKey: SupabaseDatas.supabaseKey
+    publishableKey: SupabaseDatas.supabasePublishableKey
   );
   await Hive.initFlutter();
 
