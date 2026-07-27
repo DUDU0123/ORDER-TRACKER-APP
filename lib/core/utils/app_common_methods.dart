@@ -1,19 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:order_tracker_app/core/colors/app_colors.dart';
+import 'package:order_tracker_app/core/utils/order_status_enum.dart';
 
 class AppCommonMethods {
-  static Color getStatusColor(String status) {
-    switch (status) {
-      case "Pending":
-        return AppColors.kOrange;
-      case "Processing":
-        return AppColors.kBlue;
-      case "Delivered":
-        return AppColors.kGreen;
-      case "Cancelled":
-        return AppColors.kRed;
-      default:
-        return AppColors.kGrey;
+  static Color getStatusColor({required OrderStatusEnum status}) {
+    if (status == OrderStatusEnum.pending) {
+      return AppColors.kOrange;
+    } if (status == OrderStatusEnum.processing) {
+      return AppColors.kBlue;
+    } if (status == OrderStatusEnum.delivered) {
+      return AppColors.kGreen;
+    } if (status == OrderStatusEnum.cancelled) {
+      return AppColors.kRed;
+    } else {
+      return AppColors.kGrey;
+    }
+  }
+
+  static String getOrderStatusString({required OrderStatusEnum status}) {
+    if (status == OrderStatusEnum.pending) {
+      return "Pending";
+    } if (status == OrderStatusEnum.processing) {
+      return "Processing";
+    } if (status == OrderStatusEnum.delivered) {
+      return "Delivered";
+    } if (status == OrderStatusEnum.cancelled) {
+      return "Cancelled";
+    } else {
+      return "";
     }
   }
 

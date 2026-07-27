@@ -1,7 +1,10 @@
 import 'package:get/get.dart';
+import 'package:order_tracker_app/core/colors/app_colors.dart';
+import 'package:order_tracker_app/core/utils/order_status_enum.dart';
 
 import 'package:order_tracker_app/model/data/remote_data/order_data.dart';
 import 'package:order_tracker_app/model/order_model.dart';
+import 'package:order_tracker_app/services/connection_checker.dart';
 import 'package:order_tracker_app/services/shared_prefs_service.dart';
 
 class OrderController extends GetxController {
@@ -10,6 +13,8 @@ class OrderController extends GetxController {
   List<OrderModel> allOrders = <OrderModel>[].obs;
   /// Search list
   List<OrderModel> orders = [];
+  bool isUpdating = false;
+  OrderStatusEnum orderStatus = OrderStatusEnum.processing;
   OrderController({
     required this.orderData,
   });
@@ -23,13 +28,31 @@ class OrderController extends GetxController {
     super.onInit();
   }
 
+  void selectedOrderStatusUpdate({required OrderStatusEnum? selectedOrderStatus}) {
+    orderStatus = selectedOrderStatus ?? OrderStatusEnum.processing;
+    update();
+  }
 
+  void updateIsUpdatingStatus({required bool value}) {
+    isUpdating = value;
+    update();
+  }
 
   // method for updating order status
-  void updateOrderStatus({required String orderId, required String newStatus}) async {
+  void updateOrderStatusApi({required String orderId, required String newStatus}) async {
+    final isConnected = await ConnectionChecker.checkConnectivity();
+    if (!isConnected) {
+      Get.snackbar("No Internet", "Check your internet connection.", colorText: AppColors.kRed);
+      return;
+    }
+    updateIsUpdatingStatus(value: true);
     try {
       await orderData.updateOrderStatus(orderId: orderId, status: newStatus);
+      Get.snackbar("Updated", "Status updated successfully.");
+      updateIsUpdatingStatus(value: false);
+      getAllOrders();
     } catch (e) {
+      updateIsUpdatingStatus(value: false);
       Get.snackbar("Info", e.toString());
     }
   }

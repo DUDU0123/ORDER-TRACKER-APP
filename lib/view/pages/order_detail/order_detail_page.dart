@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:order_tracker_app/controller/order_controller.dart';
+import 'package:order_tracker_app/core/colors/app_colors.dart';
 import 'package:order_tracker_app/core/constants/app_constraints.dart';
 import 'package:order_tracker_app/core/utils/app_common_methods.dart';
+import 'package:order_tracker_app/core/utils/order_status_enum.dart';
 import 'package:order_tracker_app/model/order_model.dart';
 
 class OrderDetailPage extends StatefulWidget {
@@ -18,17 +22,18 @@ class OrderDetailPage extends StatefulWidget {
 }
 
 class _OrderDetailPageState extends State<OrderDetailPage> {
-  late String selectedStatus;
 
   @override
   void initState() {
     super.initState();
-    selectedStatus = widget.order.status;
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Get.find<OrderController>().selectedOrderStatusUpdate(selectedOrderStatus: widget.order.status.toOrderStatus());
+    },);
   }
+
 
   @override
   Widget build(BuildContext context) {
-    final order = widget.order;
 
     return Scaffold(
       appBar: AppBar(
@@ -37,10 +42,22 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: FilledButton(
-            onPressed: () {
-            },
-            child: const Text("Update Status"),
+          child: GetBuilder<OrderController>(
+            builder: (orderController) {
+              return FilledButton(
+                onPressed: () {
+                  orderController.updateOrderStatusApi(
+                    orderId: widget.order.id,
+                    newStatus: AppCommonMethods.getOrderStatusString(
+                      status: orderController.orderStatus,
+                    ),
+                  );
+                },
+                child: orderController.isUpdating ? CircularProgressIndicator(
+                  color: AppColors.kBlue,
+                ) : const Text("Update Status"),
+              );
+            }
           ),
         ),
       ),
@@ -72,7 +89,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                             children: [
 
                               Text(
-                                order.orderNumber,
+                                widget.order.orderNumber,
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -81,27 +98,31 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
                               AppConstraints.kHeight6,
 
-                              Text(DateFormat("dd MMM yyyy").format(order.orderDate)),
+                              Text(DateFormat("dd MMM yyyy").format(widget.order.orderDate)),
                             ],
                           ),
                         ),
 
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 14.w,
-                            vertical: 8.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppCommonMethods.getStatusColor(selectedStatus).withOpacity(.15),
-                            borderRadius: BorderRadius.circular(30.r),
-                          ),
-                          child: Text(
-                            selectedStatus,
-                            style: TextStyle(
-                              color: AppCommonMethods.getStatusColor(selectedStatus),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        GetBuilder<OrderController>(
+                          builder: (orderController) {
+                            return Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 14.w,
+                                vertical: 8.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppCommonMethods.getStatusColor(status: orderController.orderStatus).withOpacity(.15),
+                                borderRadius: BorderRadius.circular(30.r),
+                              ),
+                              child: Text(
+                                AppCommonMethods.getOrderStatusString(status: orderController.orderStatus),
+                                style: TextStyle(
+                                  color: AppCommonMethods.getStatusColor(status: orderController.orderStatus),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          }
                         ),
                       ],
                     ),
@@ -125,9 +146,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             Card(
               child: ListTile(
                 leading: CircleAvatar(
-                  child: Text(order.customerName[0]),
+                  child: Text(widget.order.customerName[0]),
                 ),
-                title: Text(order.customerName),
+                title: Text(widget.order.customerName),
                 subtitle: const Text("Customer"),
               ),
             ),
@@ -144,7 +165,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
             AppConstraints.kHeight12,
 
-            ...order.items.map((item) {
+            ...widget.order.items.map((item) {
               return Card(
                 margin: EdgeInsets.only(bottom: 12.h),
                 child: ListTile(
@@ -181,7 +202,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     const Spacer(),
 
                     Text(
-                      "\$${order.totalPrice.toStringAsFixed(2)}",
+                      "\$${widget.order.totalPrice.toStringAsFixed(2)}",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 22.sp,
@@ -204,37 +225,39 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
             AppConstraints.kHeight12,
 
-            DropdownButtonFormField<String>(
-              value: selectedStatus,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(14),
-                ),
-              ),
-              items: const [
-                DropdownMenuItem(
-                  value: "Pending",
-                  child: Text("Pending"),
-                ),
-                DropdownMenuItem(
-                  value: "Processing",
-                  child: Text("Processing"),
-                ),
-                DropdownMenuItem(
-                  value: "Delivered",
-                  child: Text("Delivered"),
-                ),
-                DropdownMenuItem(
-                  value: "Cancelled",
-                  child: Text("Cancelled"),
-                ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  selectedStatus = value!;
-                });
-              },
+            GetBuilder<OrderController>(
+              builder: (orderController) {
+                return DropdownButtonFormField<OrderStatusEnum>(
+                  initialValue: orderController.orderStatus,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(14),
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: OrderStatusEnum.pending,
+                      child: Text("Pending"),
+                    ),
+                    DropdownMenuItem(
+                      value: OrderStatusEnum.processing,
+                      child: Text("Processing"),
+                    ),
+                    DropdownMenuItem(
+                      value: OrderStatusEnum.delivered,
+                      child: Text("Delivered"),
+                    ),
+                    DropdownMenuItem(
+                      value: OrderStatusEnum.cancelled,
+                      child: Text("Cancelled"),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    Get.find<OrderController>().selectedOrderStatusUpdate(selectedOrderStatus: value);
+                  },
+                );
+              }
             ),
 
             AppConstraints.kHeight100,
