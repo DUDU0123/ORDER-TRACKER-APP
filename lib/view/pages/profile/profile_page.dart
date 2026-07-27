@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:order_tracker_app/controller/profile_controller.dart';
 import 'package:order_tracker_app/core/colors/app_colors.dart';
 import 'package:order_tracker_app/core/constants/app_constraints.dart';
 import 'package:order_tracker_app/services/shared_prefs_service.dart';
@@ -90,6 +92,7 @@ class ProfilePage extends StatelessWidget {
                 height: 52.h,
                 child: ElevatedButton.icon(
                   onPressed: () {
+                    Get.find<ProfileController>().onLogoutClicked();
                   },
                   icon: const Icon(Icons.logout),
                   label: const Text("Logout"),

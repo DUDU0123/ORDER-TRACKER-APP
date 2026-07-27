@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:order_tracker_app/controller/login_controller.dart';
+import 'package:order_tracker_app/controller/profile_controller.dart';
 import 'package:order_tracker_app/controller/order_controller.dart';
 import 'package:order_tracker_app/core/constants/supabase_datas.dart';
 import 'package:order_tracker_app/model/data/offline_data/local_storage_service.dart';
@@ -22,7 +22,7 @@ Future<void> main() async {
 
   await Hive.openBox('orders');
   await Hive.openBox('profile');
-  Get.put<LoginController>(LoginController(profileData: ProfileData()));
+  Get.put<ProfileController>(ProfileController(profileData: ProfileData()));
   Get.put<OrderController>(OrderController(orderData: OrderData(local: LocalStorageService())));
   runApp(const RootWidgetPage());
 }

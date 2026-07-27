@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:order_tracker_app/controller/login_controller.dart';
+import 'package:order_tracker_app/controller/profile_controller.dart';
 import 'package:order_tracker_app/core/colors/app_colors.dart';
 import 'package:order_tracker_app/core/components/common_text_form_field_widget.dart';
 import 'package:order_tracker_app/core/constants/app_constraints.dart';
@@ -86,11 +86,11 @@ class _LoginPageState extends State<LoginPage> {
 
                     AppConstraints.kHeight20,
 
-                    GetBuilder<LoginController>(
-                      builder: (loginController) {
+                    GetBuilder<ProfileController>(
+                      builder: (profileController) {
                         return CommonTextFormFieldWidget(
                           controller: passwordController,
-                          obscureText: loginController.isObscure,
+                          obscureText: profileController.isObscure,
                           labelText: "Password",
                           hintText: "Enter your password",
                           prefixWidget: const Icon(Icons.lock_outline),
@@ -99,10 +99,10 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           suffixIcon: IconButton(
                             onPressed: () {
-                              Get.find<LoginController>().updateIsObscure();
+                              Get.find<ProfileController>().updateIsObscure();
                             },
                           icon: Icon(
-                              loginController.isObscure
+                              profileController.isObscure
                                 ? Icons.visibility_off_outlined
                                 : Icons.visibility_outlined,
                               ),
@@ -114,22 +114,22 @@ class _LoginPageState extends State<LoginPage> {
                       }
                     ),
                     AppConstraints.kHeight32,
-                    GetBuilder<LoginController>(
-                      builder: (loginController) {
+                    GetBuilder<ProfileController>(
+                      builder: (profileController) {
                         return SizedBox(
                           width: double.infinity,
                           height: 54.h,
                           child: FilledButton(
-                            onPressed: loginController.isLoading ? null : () {
+                            onPressed: profileController.isLoading ? null : () {
                               if (!_formKey.currentState!.validate()) return;
                               final email = emailController.text.trim();
                               final password = passwordController.text.trim();
-                              Get.find<LoginController>().onLoginButtonClicked(
+                              Get.find<ProfileController>().onLoginButtonClicked(
                                 email: email,
                                 password: password,
                               );
                             },
-                            child: loginController.isLoading
+                            child: profileController.isLoading
                                 ?  SizedBox(
                                     height: 22.h,
                                     width: 22.w,

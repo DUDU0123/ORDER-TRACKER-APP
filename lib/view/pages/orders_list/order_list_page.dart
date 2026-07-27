@@ -39,12 +39,7 @@ class _OrderListPageState extends State<OrderListPage> {
             IconButton(
               icon: const Icon(Icons.person_outline),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ProfilePage(),
-                  ),
-                );
+                Get.to(() => ProfilePage());
               },
             )
           ],

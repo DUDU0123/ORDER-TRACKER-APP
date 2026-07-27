@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:order_tracker_app/model/order_model.dart';
 import 'package:order_tracker_app/view/pages/order_detail/order_detail_page.dart';
 
@@ -15,14 +16,7 @@ class OrderViewDetailsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => OrderDetailPage(
-              order: order,
-            ),
-          ),
-        );
+        Get.to(OrderDetailPage(order: order));
       },
       child: Row(
         children: [

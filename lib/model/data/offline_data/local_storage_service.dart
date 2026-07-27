@@ -1,6 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:order_tracker_app/model/order_model.dart';
-import 'package:order_tracker_app/model/profile_model.dart';
 
 class LocalStorageService {
 
@@ -45,37 +44,4 @@ class LocalStorageService {
       return;
     }
   }
-
-  // //---------------- Profile ----------------//
-
-  // Future<void> saveProfile(ProfileModel profile) async{
-  //   try {
-  //     await profileBox.put(
-  //       "profile",
-  //       profile.toJson(),
-  //     );
-  //   } catch (e) {
-  //     return;
-  //   }
-  //   }
-
-
-  // ProfileModel? getProfile(){
-  //   try {
-  //     final data = profileBox.get("profile");
-  //     if(data==null){
-  //       return null;
-  //     }
-  //     return ProfileModel.fromJson(
-  //       Map<String,dynamic>.from(data),
-  //     );
-  //   } catch (e) {
-  //     return null;
-  //   }
-  // }
-
-  // Future<void> clear() async{
-  //   await orderBox.clear();
-  //   await profileBox.clear();
-  // }
 }

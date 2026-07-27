@@ -24,7 +24,7 @@ class SharedPrefsService {
   }
 
   /// SET USER DATA
-  static Future<bool?> setUser(ProfileModel user) async{
-    return await _prefs.setString(userKey, jsonEncode(user.toJson()));
+  static Future<bool?> setUser(ProfileModel? user) async{
+    return await _prefs.setString(userKey, user != null ? jsonEncode(user.toJson()) : '');
   }
 }
